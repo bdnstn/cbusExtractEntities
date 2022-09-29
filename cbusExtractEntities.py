@@ -2,9 +2,12 @@ from locale import format_string
 from types import NoneType
 import xml.etree.ElementTree as ET
 
+cBusQoS = '0'
+
 commentHeader = '# This file is generated from C-Bus project file, don''t modify it.\n'
 commentLights = '# It is intended to be !include(d) for lights.\n'
 commentSwitches = '# It is intended to be !include(d) for switches.\n'
+commentSensors = '# It is intended to be included for sensors.\n'
 commentEntities = '# It can be useful for copy/paste into dasboard card code.\n'
 
 lightsYaml = open('cBusLights.yaml', 'w')
@@ -14,6 +17,10 @@ lightsYaml.write(commentLights)
 switchesYaml = open('cBusSwitches.yaml', 'w')
 switchesYaml.write(commentHeader)
 switchesYaml.write(commentSwitches)
+
+sensorsYaml = open('cBusSensors.yaml', 'w')
+sensorsYaml.write(commentHeader)
+sensorsYaml.write(commentSensors)
 
 entitiesYaml = open('cBusEntities.yaml', 'w')
 entitiesYaml.write(commentHeader)
@@ -40,6 +47,12 @@ def writeYaml(name, address):
     elif 'fan' in name.lower():
         cBusType = 'switch'
         cBusIcon = 'mdi:fan'
+    elif 'light level' in name.lower():
+        cBusType = 'sensor'
+        cBusIcon = ''
+    elif 'light sensor' in name.lower():
+        cBusType = 'switch'
+        cBusIcon = 'mdi:light-switch'
     elif 'switch' in name.lower():
         cBusType = 'switch'
         cBusIcon = 'mdi:light-switch'
@@ -65,7 +78,7 @@ def writeYaml(name, address):
             switchesYaml.write('      retain: true \n')
             if cBusIcon != '':
                 switchesYaml.write('      icon: ' + cBusIcon + '\n')
-            switchesYaml.write('      qos: 1\n')
+            switchesYaml.write('      qos: ' + cBusQoS + '\n')
             switchesYaml.write(
                 '      unique_id: cBusGroupAddr' + address + '\n')
 
@@ -87,8 +100,20 @@ def writeYaml(name, address):
             lightsYaml.write('      retain: true \n')
             if cBusIcon != '':
                 lightsYaml.write('      icon: ' + cBusIcon + '\n')
-            lightsYaml.write('      qos: 1\n')
+            lightsYaml.write('      qos: ' + cBusQoS + '\n')
             lightsYaml.write(
+                '      unique_id: cBusGroupAddr' + address + '\n')
+
+        if cBusType == 'sensor':
+            sensorsYaml.write('\n' + '    - name: ' + name + '\n')
+            sensorsYaml.write(
+                '      state_topic: "cbus/read/254/56/' + address + '/level"' + '\n')
+            sensorsYaml.write(
+                '      device_class: illuminance\n')
+            if cBusIcon != '':
+                sensorsYaml.write('      icon: ' + cBusIcon + '\n')
+            sensorsYaml.write('      qos: ' + cBusQoS + '\n')
+            sensorsYaml.write(
                 '      unique_id: cBusGroupAddr' + address + '\n')
 
         return cBusType
