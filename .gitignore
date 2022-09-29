@@ -2,6 +2,7 @@
 cBusLights.yaml
 cBusSwitches.yaml
 cBusEntities.yaml
+cBusSensors.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
